@@ -1,6 +1,6 @@
 # Prisma AIRS API Intercept Demo
 
-This project demonstrates a fully functional, browser-based chat interface backed by a Node.js/Express server. It is structured to facilitate the integration of a Large Language Model (LLM) for response generation and a Palo Alto Networks Prisma AIRS client for security scanning.
+This project demonstrates a fully functional, browser-based chat interface backed by a Node.js/Express server. It is structured to facilitate the integration of a Large Language Model (LLM) for response generation and Palo Alto Networks Prisma AIRS - API Intercept for security scanning.
 
 ## Prerequisites
 
@@ -29,11 +29,7 @@ cd Prisma-AIRS-API-Intercept-Demo
 Install all necessary Node.js packages (`express`, `uuid`, etc.):
 
 ```bash
-npm install express
-npm install uuid
-npm install openai
-npm install path
-npm install url
+npm install
 ```
 
 ### 3. Configure Your Environment
