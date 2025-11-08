@@ -3,8 +3,9 @@ const MOCK_ENDPOINT = process.env.PRISMA_AIRS_ENDPOINT;
 const MOCK_API_KEY = process.env.PRISMA_AIRS_SECURITY_KEY;
 const MOCK_PROFILE_ID = process.env.PRISMA_AIRS_PROFILE_ID;
 
-// Import the class *after* the mock has been established by Jest's runner
-import { PrismaAirs } from '../prismaAirs.js';
+// FIX: Correcting the import path casing to match the file name (prismaAirs.js)
+// This resolves the case-sensitivity issue on the Linux CI runner.
+import { PrismaAirs } from './prismaAirs.js';
 
 // Mock the global fetch function used by the PrismaAirs client
 global.fetch = jest.fn();

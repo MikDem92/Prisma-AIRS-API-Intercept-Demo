@@ -5,15 +5,19 @@
  * CommonJS libraries (like 'uuid') in an ESM test environment.
  */
 export default {
-    // Collect coverage from your source files
+    rootDir: '.', 
+    
+    // Explicitly define the source directory for module resolution.
+    moduleDirectories: ['node_modules', 'src'], 
+
+    // Corrected to lowercase 'p' to match the file system: prismaAirs.js
     collectCoverageFrom: [
-        "PrismaAirs.js"
+        "src/prismaAirs.js" 
     ],
     // Force Jest to transform modules in node_modules that are CJS, 
     // especially 'uuid', to make them compatible with ESM.
     transformIgnorePatterns: [
         "/node_modules/(?!uuid)/"
     ],
-    // The test environment for Node.js projects
     testEnvironment: 'node',
 };
