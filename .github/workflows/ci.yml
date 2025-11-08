@@ -1,0 +1,44 @@
+name: Node.js CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+      
+    - name: Use Node.js 20.x
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm install
+
+    # Create the necessary constants file for testing (since it's gitignored)
+    # The actual values will be read from the injected environment variables in the test step.
+    - name: Create constants.js for testing
+      run: |
+        mkdir -p src
+        echo "export const AI_CHAT_ENDPOINT = '';" >> src/constants.js
+        echo "export const AI_CHAT_MODEL = '';" >> src/constants.js
+        echo "export const AI_CHAT_KEY = '';" >> src/constants.js
+        echo "export const PRISMA_AIRS_ENDPOINT = '';" >> src/constants.js
+        echo "export const PRISMA_AIRS_SECURITY_KEY = '';" >> src/constants.js
+        echo "export const PRISMA_AIRS_PROFILE_ID = '';" >> src/constants.js
+      shell: bash
+
+    - name: Run unit tests
+      run: npm test
+      # CRITICAL: Inject secrets as environment variables for the test run
+      env:
+        PRISMA_AIRS_ENDPOINT: ${{ secrets.PRISMA_AIRS_ENDPOINT }}
+        PRISMA_AIRS_SECURITY_KEY: ${{ secrets.PRISMA_AIRS_SECURITY_KEY }}
+        PRISMA_AIRS_PROFILE_ID: ${{ secrets.PRISMA_AIRS_PROFILE_ID }}
