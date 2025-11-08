@@ -1,0 +1,1 @@
+export const v4 = () => 'mock-tr-id-0001';

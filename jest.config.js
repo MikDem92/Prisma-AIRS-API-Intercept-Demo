@@ -1,19 +1,19 @@
-/** @type {import('jest').Config} */
-const config = {
-    // Use the 'js' extension for module resolution
-    moduleFileExtensions: ['js'],
-    
-    // Look for test files ending in .test.js
-    testMatch: ['**/src/**/*.test.js'],
-    
-    // Set test environment to node
-    testEnvironment: 'node',
-  
-    // CRITICAL FIX: Instruct Jest to transform the uuid package
-    transformIgnorePatterns: [
-      // This regex ignores all of node_modules EXCEPT 'uuid'
-      '/node_modules/(?!uuid)/',
+/**
+ * Jest configuration for an ES Module (type: 'module') Node.js project.
+ * The transformIgnorePatterns setting is CRITICAL to resolve the 
+ * "ReferenceError: require is not defined" error when importing 
+ * CommonJS libraries (like 'uuid') in an ESM test environment.
+ */
+export default {
+    // Collect coverage from your source files
+    collectCoverageFrom: [
+        "PrismaAirs.js"
     ],
-  };
-  
-  export default config;
+    // Force Jest to transform modules in node_modules that are CJS, 
+    // especially 'uuid', to make them compatible with ESM.
+    transformIgnorePatterns: [
+        "/node_modules/(?!uuid)/"
+    ],
+    // The test environment for Node.js projects
+    testEnvironment: 'node',
+};
