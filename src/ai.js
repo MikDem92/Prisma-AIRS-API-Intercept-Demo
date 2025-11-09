@@ -32,12 +32,12 @@ const prismaAirsClient = new PrismaAirs({
  */
 export async function chat(prompt) {
     try {
-        const prismaAirsResponse = await prismaAirsClient.scanRequest(prompt);
-        console.log(prismaAirsResponse);
-        const { action, category } = prismaAirsResponse;
+        const promptScan = await prismaAirsClient.scanRequest(prompt);
+        console.log(promptScan);
+        const { action: reqAction, category: reqCategory } = promptScan;
 
-        if (action === "block"){
-            if (category === "malicious") {
+        if (reqAction === "block"){
+            if (reqCategory === "malicious") {
                 return "Prisma AIRS discovered a malicious prompt!"
             } else {
                 return "Prisma AIRS discovered a prompt which violates the company policy."
@@ -52,6 +52,18 @@ export async function chat(prompt) {
             model: AI_CHAT_MODEL,
         });
         const response = completion.choices[0].message.content;
+        const responseScan = await prismaAirsClient.scanResponse(prompt, response);
+        console.log(responseScan);
+        const { action: respAction, category: respCategory } = responseScan;
+
+        if (respAction === "block"){
+            if (respCategory === "malicious") {
+                return "Prisma AIRS discovered a malicious response!"
+            } else {
+                return "Prisma AIRS blocked the response due to company policy violation."
+            }
+        }
+
         return response;
     } catch (error) {
         console.error(error.message);
