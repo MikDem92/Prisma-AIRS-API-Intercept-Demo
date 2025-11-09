@@ -17,6 +17,7 @@ You must have the following installed on your system:
 
 Follow these steps to get the demo running on your machine.
 
+
 ### 1. Clone the Repository
 
 If you haven't already, clone the repository and navigate into the project directory.
@@ -26,6 +27,7 @@ git clone https://github.com/MikDem92/Prisma-AIRS-API-Intercept-Demo.git
 cd Prisma-AIRS-API-Intercept-Demo
 ```
 
+
 ### 2. Install Dependencies
 
 Install all necessary Node.js packages (`express`, `openai`, `uuid`, etc.):
@@ -33,6 +35,7 @@ Install all necessary Node.js packages (`express`, `openai`, `uuid`, etc.):
 ```bash
 npm install
 ```
+
 
 ### 3. Configure Your Environment
 
@@ -52,6 +55,7 @@ export const PRISMA_AIRS_PROFILE_ID = "";
 
 **Important**: Keep your API keys secure and never commit them to version control.
 
+
 ### 4. Run the Application
 
 Start the Node.js/Express application using the defined `start` script:
@@ -61,6 +65,7 @@ npm start
 ```
 
 The server will start on the default port (typically `http://localhost:3000`). Open your web browser and navigate to this URL to access the chat interface.
+
 
 ### 5. Stop the Server
 
@@ -107,7 +112,6 @@ The tests cover:
 - **Security**: Prisma AIRS API Intercept
 - **AI Integration**: OpenAI API (or compatible endpoints)
 
----
 
 ## CI/CD Pipeline
 
@@ -119,7 +123,6 @@ This repository includes GitHub Actions workflows for:
 
 The tests run automatically when you push changes or create pull requests.
 
----
 
 ## Troubleshooting
 
@@ -136,6 +139,7 @@ The tests run automatically when you push changes or create pull requests.
 rm -rf node_modules package-lock.json
 npm install
 ```
+
 
 ### Getting Help
 
