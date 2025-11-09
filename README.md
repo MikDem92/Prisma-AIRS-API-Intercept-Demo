@@ -1,4 +1,4 @@
-# Prisma AIRS API Intercept Demo
+# Prisma AIRS (API Intercept) - Demo
 [![Node.js CI](https://github.com/MikDem92/Prisma-AIRS-API-Intercept-Demo/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/MikDem92/Prisma-AIRS-API-Intercept-Demo/actions/workflows/ci.yml)
 [![CodeQL Advanced](https://github.com/MikDem92/Prisma-AIRS-API-Intercept-Demo/actions/workflows/codeql.yml/badge.svg)](https://github.com/MikDem92/Prisma-AIRS-API-Intercept-Demo/actions/workflows/codeql.yml)
 
