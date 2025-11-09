@@ -66,6 +66,12 @@ export class PrismaAirs {
 
         const result = await apiResponse.json();
 
+        // Check for non-200 responses and throw an error
+        if (!apiResponse.ok) {
+            const errorMessage = result.error?.message || result.message || apiResponse.statusText;
+            throw new Error(`PrismaAirs request failed. API Message: ${errorMessage}`);
+        }
+
         //console.log(JSON.stringify(result));
         return result;
     }
@@ -106,6 +112,12 @@ export class PrismaAirs {
         });
 
         const result = await apiResponse.json();
+
+        // Check for non-200 responses and throw an error
+        if (!apiResponse.ok) {
+            const errorMessage = result.error?.message || result.message || apiResponse.statusText;
+            throw new Error(`PrismaAirs request failed. API Message: ${errorMessage}`);
+        }
 
         //console.log(JSON.stringify(result));
         return result;

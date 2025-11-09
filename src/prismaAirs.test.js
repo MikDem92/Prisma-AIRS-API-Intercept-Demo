@@ -1,11 +1,20 @@
+// Import Jest functions for ES modules
+import { jest, describe, test, beforeEach, expect } from '@jest/globals';
+
+// Mock the uuid module before importing the module under test
+jest.unstable_mockModule('uuid', () => ({
+    v4: jest.fn(() => 'mock-tr-id-0001')
+}));
+
 // Read configuration from environment variables (set by GitHub Actions secrets)
-const MOCK_ENDPOINT = process.env.PRISMA_AIRS_ENDPOINT;
-const MOCK_API_KEY = process.env.PRISMA_AIRS_SECURITY_KEY;
-const MOCK_PROFILE_ID = process.env.PRISMA_AIRS_PROFILE_ID;
+const MOCK_ENDPOINT = process.env.PRISMA_AIRS_ENDPOINT || 'https://mock-endpoint.example.com';
+const MOCK_API_KEY = process.env.PRISMA_AIRS_SECURITY_KEY || 'mock-api-key';
+const MOCK_PROFILE_ID = process.env.PRISMA_AIRS_PROFILE_ID || 'mock-profile-id';
+const MOCK_MODEL_NAME = 'gemini-model-placeholder';
 
 // FIX: Correcting the import path casing to match the file name (prismaAirs.js)
 // This resolves the case-sensitivity issue on the Linux CI runner.
-import { PrismaAirs } from './prismaAirs.js';
+const { PrismaAirs } = await import('./prismaAirs.js');
 
 // Mock the global fetch function used by the PrismaAirs client
 global.fetch = jest.fn();
@@ -15,7 +24,8 @@ describe('PrismaAirs Client Integration and Payload Structure', () => {
     const client = new PrismaAirs({
         endpoint: MOCK_ENDPOINT,
         apiKey: MOCK_API_KEY,
-        profileId: MOCK_PROFILE_ID
+        profileId: MOCK_PROFILE_ID,
+        modelName: MOCK_MODEL_NAME
     });
 
     // Reset fetch mock before each test
@@ -53,17 +63,14 @@ describe('PrismaAirs Client Integration and Payload Structure', () => {
         const sentPayload = JSON.parse(callArgs.body);
 
         expect(sentPayload).toEqual({
-            // Should be the mock value from __mocks__/uuid.js
+            // Should be the mock value from jest.mock('uuid')
             tr_id: 'mock-tr-id-0001', 
             ai_profile: {
-                profile_id: MOCK_PROFILE_ID,
-                profile_name: "Generic Prisma AI Profile" 
+                profile_id: MOCK_PROFILE_ID
             },
             metadata: {
                 app_name: "My Chat Assistant",
-                app_user: "anonymous_user",
-                ai_model: "gemini-model-placeholder",
-                user_ip: ""
+                ai_model: MOCK_MODEL_NAME
             },
             contents: [
                 {
