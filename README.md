@@ -1,5 +1,6 @@
 # Prisma AIRS API Intercept Demo
 [![Node.js CI](https://github.com/MikDem92/Prisma-AIRS-API-Intercept-Demo/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/MikDem92/Prisma-AIRS-API-Intercept-Demo/actions/workflows/ci.yml)
+[![CodeQL Advanced](https://github.com/MikDem92/Prisma-AIRS-API-Intercept-Demo/actions/workflows/codeql.yml/badge.svg)](https://github.com/MikDem92/Prisma-AIRS-API-Intercept-Demo/actions/workflows/codeql.yml)
 
 This project demonstrates a fully functional, browser-based chat interface backed by a Node.js/Express server. It is structured to facilitate the integration of a Large Language Model (LLM) for response generation and Palo Alto Networks Prisma AIRS - API Intercept for security scanning.
 
