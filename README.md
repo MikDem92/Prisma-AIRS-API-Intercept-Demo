@@ -22,7 +22,7 @@ Follow these steps to get the demo running on your machine.
 If you haven't already, clone the repository and navigate into the project directory.
 
 ```bash
-git clone [https://github.com/MikDem92/Prisma-AIRS-API-Intercept-Demo.git](https://github.com/MikDem92/Prisma-AIRS-API-Intercept-Demo.git)
+git clone https://github.com/MikDem92/Prisma-AIRS-API-Intercept-Demo.git
 cd Prisma-AIRS-API-Intercept-Demo
 ```
 
