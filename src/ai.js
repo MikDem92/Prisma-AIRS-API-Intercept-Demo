@@ -1,12 +1,20 @@
 import OpenAI from "openai";
 
+import CosmosClient from "@azure/cosmos";
+
+import v4 from "uuid"; 
+
 import {
     AI_CHAT_ENDPOINT,
     AI_CHAT_KEY,
     AI_CHAT_MODEL,
     PRISMA_AIRS_ENDPOINT,
     PRISMA_AIRS_SECURITY_KEY,
-    PRISMA_AIRS_PROFILE_ID
+    PRISMA_AIRS_PROFILE_ID,
+    COSMOSDB_ENDPOINT,
+    COSMOSDB_KEY,
+    COSMOSDB_DATABASE,
+    COSMOSDB_CONTAINER
 } from "./constants.js";
 
 import { PrismaAirs } from "./prismaAirs.js";
@@ -24,6 +32,59 @@ const prismaAirsClient = new PrismaAirs({
 });
 
 
+const cosmosClient = new CosmosClient({
+    endpoint: COSMOSDB_ENDPOINT,
+    key: COSMOSDB_KEY
+});
+
+
+export async function writeToDb(chatId, prompt, response){
+    try {
+        const container = cosmosClient.database(COSMOSDB_DATABASE).container(COSMOSDB_CONTAINER);       
+
+        const input = {
+            id: v4(),
+            chatId,
+            prompt,
+            response,
+            createdAt: Date.now()
+        };
+
+        await container.items.create(input);
+
+    } catch (error) {
+        console.error(error.message);
+    }
+}
+
+
+export async function readTopXFromDB(chatId, x) {
+    try {
+        const container = cosmosClient.database(COSMOSDB_DATABASE).container(COSMOSDB_CONTAINER);
+
+        const querySpec = {
+            query: `
+                SELECT c.prompt, c.response
+                FROM Chats c
+                WHERE c.chatId = @chatId
+                ORDER BY c.createdAt DESC
+                OFFSET 0 LIMIT @x
+            `,
+            parameters: [
+                { name: "@chatId", value: chatId },
+                { name: "@x", value: x}
+            ],
+        };
+
+        const cosmosResponse = await container.items.query(querySpec).fetchAll();
+        return cosmosResponse.resources;
+
+    } catch (error) {
+        console.error(error.message);
+    }
+}
+
+
 /**
  * Chat with the LLM hosted in Azure.
  * 
@@ -32,6 +93,7 @@ const prismaAirsClient = new PrismaAirs({
  */
 export async function chat(prompt) {
     try {
+        /**
         const prismaAirsResponse = await prismaAirsClient.scanRequest(prompt);
         console.log(prismaAirsResponse);
         const { action, category } = prismaAirsResponse;
@@ -43,6 +105,7 @@ export async function chat(prompt) {
                 return "Prisma AIRS discovered a prompt which violates the company policy."
             }
         }
+        **/
 
         const completion = await client.chat.completions.create({
             messages: [
