@@ -29,9 +29,9 @@ export class PrismaAirs {
         this.#modelName = modelName;
     }
 
+
     /**
      * Sends a scanning request with a user prompt.
-     * (Currently empty, waiting for integration logic.)
      * @param {string} prompt The text prompt to scan.
      */
     async scanRequest(prompt) {
@@ -51,7 +51,9 @@ export class PrismaAirs {
             ]
         };
 
-        const response = await fetch(this.#endpoint, {
+        //console.log("PrismaAirs scanRequest payload:", JSON.stringify(payload));
+
+        const apiResponse = await fetch(this.#endpoint, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -62,7 +64,60 @@ export class PrismaAirs {
             body: JSON.stringify(payload)
         });
 
-        const result = await response.json();
+        const result = await apiResponse.json();
+
+        // Check for non-200 responses and throw an error
+        if (!apiResponse.ok) {
+            const errorMessage = result.error?.message || result.message || apiResponse.statusText;
+            throw new Error(`PrismaAirs request failed. API Message: ${errorMessage}`);
+        }
+
+        //console.log(JSON.stringify(result));
+        return result;
+    }
+
+
+    /**
+     * Sends a scanning request with a model response.
+     * @param {string} prompt The original prompt that generated the response.
+     * @param {string} response The model response to scan.
+     */
+    async scanResponse(prompt, response) {
+        const payload = {
+            tr_id: uuidv4(),
+            ai_profile: {
+                profile_id: this.#profileId
+            },
+            metadata: {
+                app_name: "My Chat Assistant",
+                ai_model: this.#modelName
+            },
+            contents: [
+                {
+                    response: response,
+                    context: prompt
+                }
+            ]
+        };
+
+        const apiResponse = await fetch(this.#endpoint, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'x-pan-token': this.#apiKey
+            },
+            // Convert the JavaScript object to a JSON string for the body
+            body: JSON.stringify(payload)
+        });
+
+        const result = await apiResponse.json();
+
+        // Check for non-200 responses and throw an error
+        if (!apiResponse.ok) {
+            const errorMessage = result.error?.message || result.message || apiResponse.statusText;
+            throw new Error(`PrismaAirs request failed. API Message: ${errorMessage}`);
+        }
 
         //console.log(JSON.stringify(result));
         return result;

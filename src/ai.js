@@ -1,8 +1,8 @@
 import OpenAI from "openai";
 
-import CosmosClient from "@azure/cosmos";
+import { CosmosClient } from "@azure/cosmos";
 
-import v4 from "uuid"; 
+import { v4 } from "uuid"; 
 
 import {
     AI_CHAT_ENDPOINT,
@@ -76,7 +76,11 @@ export async function readTopXFromDB(chatId, x) {
             ],
         };
 
-        const cosmosResponse = await container.items.query(querySpec).fetchAll();
+        const options = {
+            partitionKey: [chatId]
+        };
+
+        const cosmosResponse = await container.items.query(querySpec, options).fetchAll();
         return cosmosResponse.resources;
 
     } catch (error) {
@@ -88,12 +92,28 @@ export async function readTopXFromDB(chatId, x) {
 /**
  * Chat with the LLM hosted in Azure.
  * 
+ * @param {String} chatId - The ID of the chat
  * @param {String} message - Input text message
- * @returns {String} Chat response
+ * @returns {Promise<String>} Chat response
  */
-export async function chat(prompt) {
+export async function chat(chatId, prompt) {
     try {
-        /**
+        //console.log("Chat ID: ", chatId);
+        const chatContext = await readTopXFromDB(chatId, 10);
+
+        //console.log("The old raw context: ", chatContext);
+        //console.log("Reading ", chatContext.length, " records");
+
+        let messages = [];
+        for (const record of chatContext){
+            messages.push({ role: "user", content: record.prompt });
+            messages.push({ role: "assistant", content: record.response });
+        }
+
+        messages.push({ role: "user", content: prompt });
+
+        //console.log("The new context: ", messages);
+
         const prismaAirsResponse = await prismaAirsClient.scanRequest(prompt);
         console.log(prismaAirsResponse);
         const { action, category } = prismaAirsResponse;
@@ -105,23 +125,37 @@ export async function chat(prompt) {
                 return "Prisma AIRS discovered a prompt which violates the company policy."
             }
         }
-        **/
 
         const completion = await client.chat.completions.create({
-            messages: [
-                //{ role: "developer", content: "System prompt" },
-                { role: "user", content: prompt }
-            ],
+            messages,
             model: AI_CHAT_MODEL,
         });
         const response = completion.choices[0].message.content;
+
+        console.log("The chat bot responds with: ", response.slice(0, 10), "...");
+
+        const responseScan = await prismaAirsClient.scanResponse(prompt, response);
+        console.log(responseScan);
+        const { action: respAction, category: respCategory } = responseScan;
+
+        if (respAction === "block"){
+            if (respCategory === "malicious") {
+                return "Prisma AIRS discovered a malicious response!"
+            } else {
+                return "Prisma AIRS blocked the response due to company policy violation."
+            }
+        }
+
+        await writeToDb(chatId, prompt, response);
+
         return response;
+
     } catch (error) {
         console.error(error.message);
         if (error.code == 400) {
             return "The response was filtered due to the prompt triggering the model-native security policy";
         } else {
-            return "I encountered an error while processing your request. Please try again later..."
+            return "I encountered an error while processing your request. Please try again later...";
         }
     }
 }
