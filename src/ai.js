@@ -10,12 +10,11 @@ import {
     AI_CHAT_MODEL,
     PRISMA_AIRS_ENDPOINT,
     PRISMA_AIRS_SECURITY_KEY,
-    PRISMA_AIRS_PROFILE_ID,
     COSMOSDB_ENDPOINT,
     COSMOSDB_KEY,
     COSMOSDB_DATABASE,
     COSMOSDB_CONTAINER
-} from "./constants.js";
+} from "./settings.js";
 
 import { PrismaAirs } from "./prismaAirs.js";
 
@@ -23,6 +22,10 @@ const client = new OpenAI({
     baseURL: AI_CHAT_ENDPOINT,
     apiKey: AI_CHAT_KEY
 });
+
+/// Specify the Security Profile ID here ///
+const PRISMA_AIRS_PROFILE_ID = "";
+////////////////////////////////////////////
 
 const prismaAirsClient = new PrismaAirs({
     endpoint: PRISMA_AIRS_ENDPOINT,
@@ -38,6 +41,14 @@ const cosmosClient = new CosmosClient({
 });
 
 
+/**
+ * Writes the prompt and response to CosmosDB
+ * 
+ * @param {String} chatId - The chat session ID
+ * @param {String} prompt - User prompt
+ * @param {String} response - AI assistant response
+ * @returns {Promise<void>} Resolves if write is successful
+ */
 export async function writeToDb(chatId, prompt, response){
     try {
         const container = cosmosClient.database(COSMOSDB_DATABASE).container(COSMOSDB_CONTAINER);       
@@ -57,7 +68,13 @@ export async function writeToDb(chatId, prompt, response){
     }
 }
 
-
+/**
+ * Reads the top X chat entries from CosmosDB delivering the context of the conversation.
+ * 
+ * @param {String} chatId - The chat session ID
+ * @param {Number} x - Number of most recent entries to be returned
+ * @returns {Promise<Array>} An array of objects containing the recent user prompts and AI responses
+ */
 export async function readTopXFromDB(chatId, x) {
     try {
         const container = cosmosClient.database(COSMOSDB_DATABASE).container(COSMOSDB_CONTAINER);
@@ -114,15 +131,17 @@ export async function chat(chatId, prompt) {
 
         //console.log("The new context: ", messages);
 
-        const prismaAirsResponse = await prismaAirsClient.scanRequest(prompt);
-        console.log(prismaAirsResponse);
-        const { action, category } = prismaAirsResponse;
+        if (PRISMA_AIRS_PROFILE_ID && PRISMA_AIRS_PROFILE_ID.trim() !== "") {
+            const prismaAirsResponse = await prismaAirsClient.scanRequest(prompt);
+            console.log(prismaAirsResponse);
+            const { action, category } = prismaAirsResponse;
 
-        if (action === "block"){
-            if (category === "malicious") {
-                return "Prisma AIRS discovered a malicious prompt!"
-            } else {
-                return "Prisma AIRS discovered a prompt which violates the company policy."
+            if (action === "block"){
+                if (category === "malicious") {
+                    return "Prisma AIRS discovered a malicious prompt!"
+                } else {
+                    return "Prisma AIRS discovered a prompt which violates the company policy."
+                }
             }
         }
 
@@ -134,15 +153,17 @@ export async function chat(chatId, prompt) {
 
         console.log("The chat bot responds with: ", response.slice(0, 10), "...");
 
-        const responseScan = await prismaAirsClient.scanResponse(prompt, response);
-        console.log(responseScan);
-        const { action: respAction, category: respCategory } = responseScan;
+        if (PRISMA_AIRS_PROFILE_ID && PRISMA_AIRS_PROFILE_ID.trim() !== "") {
+            const responseScan = await prismaAirsClient.scanResponse(prompt, response);
+            console.log(responseScan);
+            const { action: respAction, category: respCategory } = responseScan;
 
-        if (respAction === "block"){
-            if (respCategory === "malicious") {
-                return "Prisma AIRS discovered a malicious response!"
-            } else {
-                return "Prisma AIRS blocked the response due to company policy violation."
+            if (respAction === "block"){
+                if (respCategory === "malicious") {
+                    return "Prisma AIRS discovered a malicious response!"
+                } else {
+                    return "Prisma AIRS blocked the response due to company policy violation."
+                }
             }
         }
 

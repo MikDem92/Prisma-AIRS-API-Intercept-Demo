@@ -6,8 +6,21 @@ This project demonstrates a fully functional, browser-based chat interface backe
 
 You must have the following installed on your system:
 
+**PRISMA AIRS**
+Make sure you have Prisma AIRS - API Intercept deployed. Refer to the following documentation for more:
+https://docs.paloaltonetworks.com/ai-runtime-security/activation-and-onboarding/ai-runtime-security-api-intercept-overview
+
+**RUNTIME ENVIRONMENT**
+The demo application is built with Node.js, so you require:
+
 * **Node.js** (LTS version recommended)
 * **npm** (Node Package Manager)
+
+**AI MODELS**
+The demo uses AI models hosted via the Azure AI Foundry. Make sure you have a project with an inference model of your choice (e.g. gpt-4o-mini) deployed.
+
+**DATABASE**
+Also make sure you have a **CosmosDB** instance for storing the conversation context (regular NoSQL option). The container should have **chatId** spedified as the partition key.
 
 ---
 
@@ -34,9 +47,9 @@ npm install
 
 ### 3. Configure Your Environment
 
-Since the `src/constants.js` file is ignored by Git (it contains sensitive keys), you must create it manually. This file will hold all endpoints and API keys required for both the generic LLM and the Prisma AIRS client.
+Since the `src/settings.js` file is ignored by Git (it contains sensitive keys), you must create it manually. This file will hold all endpoints and API keys required for the generic LLM, your CosmosDB instance and the Prisma AIRS client.
 
-Create a new file at **`src/constants.js`** and add the following content. Populate the string values (`""`) with your actual configuration details.
+Create a new file at **`src/settings.js`** and add the following content. Populate the string values (`""`) with your actual configuration details.
 
 ```javascript
 export const AI_CHAT_ENDPOINT = "";
@@ -45,7 +58,17 @@ export const AI_CHAT_KEY = "";
 
 export const PRISMA_AIRS_ENDPOINT = "";
 export const PRISMA_AIRS_SECURITY_KEY = "";
-export const PRISMA_AIRS_PROFILE_ID = "";
+
+export const COSMOSDB_ENDPOINT = "";
+export const COSMOSDB_KEY = "";
+export const COSMOSDB_DATABASE = "";
+export const COSMOSDB_CONTAINER = "";
+```
+
+In `src/ai.js` specify the Security Profile ID of the rule set you want to test:
+
+```javascript
+const PRISMA_AIRS_PROFILE_ID = "";
 ```
 
 ### 4. Run the Server
