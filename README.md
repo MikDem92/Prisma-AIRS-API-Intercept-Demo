@@ -20,7 +20,10 @@ The demo application is built with Node.js, so you require:
 The demo uses AI models hosted via the Azure AI Foundry. Make sure you have a project with an inference model of your choice (e.g. gpt-4o-mini) deployed.
 
 **DATABASE:**
-Also make sure you have a **CosmosDB** instance for storing the conversation context (regular NoSQL option). The container should have **chatId** spedified as the partition key.
+Also make sure you have a **CosmosDB** instance for storing the conversation context (regular NoSQL option). There should be one database with two containers:
+
+- One container for storing the chat prompts and responses (should have **chatId** spedified as the partition key).
+- Another one for storing internal user data with arbitrary content (arbitrary partition key).
 
 ---
 
@@ -62,7 +65,8 @@ export const PRISMA_AIRS_SECURITY_KEY = "";
 export const COSMOSDB_ENDPOINT = "";
 export const COSMOSDB_KEY = "";
 export const COSMOSDB_DATABASE = "";
-export const COSMOSDB_CONTAINER = "";
+export const COSMOSDB_CONTAINER_CHATS = "";
+export const COSMOSDB_CONTAINER_DATA = "":
 ```
 
 In `src/ai.js` specify the Security Profile ID of the rule set you want to test:

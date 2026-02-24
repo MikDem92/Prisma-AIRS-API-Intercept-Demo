@@ -133,29 +133,47 @@ export class PrismaAirs {
      * Returns block reason in natural language
      * 
      * @param {Object} detectionObject - Either prompt_detected or response_detected object
-     * @returns {String} Block reason in natural language
+     * @returns {Array<String>} Block reasons in natural language
      */
-    static determineBlockReason(detectionObject) {
+    static determineBlockReasons(detectionObject) {
         try {
             if (!detectionObject) throw new Error("The input is not an object");
 
+            const blockReasons = [];
             for (const category in detectionObject) {
                 if (detectionObject[category] === true) {
                     switch (category) {
-                        case 'dlp': return 'Verletzung der Datenschutzrichtlinien';
-                        case 'injection': return 'Injection erkannt';
-                        case 'malicious_code': return 'Schadcode erkannt';
-                        case 'topic_violation': return 'Thema nicht erlaubt';
-                        case 'toxic_content': return 'Schadhafter Content erkannt';
-                        case 'url_cats': return 'Verdächtige URL erkannt';
-                        default: continue; // Keep looking if it's an unknown category
+                        case 'dlp':
+                            blockReasons.push('Verletzung der Datenschutzrichtlinien');
+                            break;
+                        case 'injection':
+                            blockReasons.push('Injection erkannt');
+                            break;
+                        case 'malicious_code':
+                            blockReasons.push('Schadcode erkannt');
+                            break;
+                        case 'topic_violation':
+                            blockReasons.push('Thema nicht erlaubt');
+                            break;
+                        case 'toxic_content':
+                            blockReasons.push('Schadhafter Content erkannt');
+                            break;
+                        case 'url_cats':
+                            blockReasons.push('Verdächtige URL erkannt');
+                            break;
+                        default:
+                            break; // Keep looking if it's an unknown category
                     }
                 }
             }
-            return 'Sonstiges'; // Fallback if no specific true categories matched
+            if (blockReasons.length == 0){
+                blockReasons.push('Sonstiges');
+            }
+
+            return blockReasons;
         } catch (error) {
             console.error("Error determining block reason:", error.message);
-            return 'Unbekannt';
+            return ['Unbekannt'];
         }
     }
 }

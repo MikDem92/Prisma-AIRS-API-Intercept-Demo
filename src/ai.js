@@ -13,7 +13,8 @@ import {
     COSMOSDB_ENDPOINT,
     COSMOSDB_KEY,
     COSMOSDB_DATABASE,
-    COSMOSDB_CONTAINER
+    COSMOSDB_CONTAINER_CHATS,
+    COSMOSDB_CONTAINER_DATA
 } from "./settings.js";
 
 import { PrismaAirs } from "./prismaAirs.js";
@@ -51,7 +52,7 @@ const cosmosClient = new CosmosClient({
  */
 export async function writeToDb(chatId, prompt, response){
     try {
-        const container = cosmosClient.database(COSMOSDB_DATABASE).container(COSMOSDB_CONTAINER);       
+        const container = cosmosClient.database(COSMOSDB_DATABASE).container(COSMOSDB_CONTAINER_CHATS);       
 
         const input = {
             id: v4(),
@@ -77,12 +78,12 @@ export async function writeToDb(chatId, prompt, response){
  */
 export async function readTopXFromDB(chatId, x) {
     try {
-        const container = cosmosClient.database(COSMOSDB_DATABASE).container(COSMOSDB_CONTAINER);
+        const container = cosmosClient.database(COSMOSDB_DATABASE).container(COSMOSDB_CONTAINER_CHATS);
 
         const querySpec = {
             query: `
                 SELECT c.prompt, c.response
-                FROM Chats c
+                FROM ${COSMOSDB_CONTAINER_CHATS} c
                 WHERE c.chatId = @chatId
                 ORDER BY c.createdAt DESC
                 OFFSET 0 LIMIT @x
@@ -107,13 +108,44 @@ export async function readTopXFromDB(chatId, x) {
 
 
 /**
+ * Returns internal data as additional context to the chat assistant.
+ * 
+ * @returns {Promise<String>} A string containing internal data
+ */
+export async function addInternalDataContext(){
+    try {
+        const container = cosmosClient.database(COSMOSDB_DATABASE).container(COSMOSDB_CONTAINER_DATA);
+
+        const querySpec = {
+            query: `
+                SELECT d.firstName, d.lastName, d.zip, d.ccn, d.dob
+                FROM ${COSMOSDB_CONTAINER_DATA} d
+            `
+        };
+        const cosmosResponse = await container.items.query(querySpec).fetchAll();
+
+        const promptSuffix = `
+            Today is ${new Date().toISOString()}. You are a helpful agent that has access to internal personal data that you may share with the user upon request.
+            The internal data is: ${JSON.stringify(cosmosResponse.resources)}.
+        `;
+
+        return promptSuffix;
+
+    } catch (error){
+        console.error(error.message)
+    }
+}
+
+
+/**
  * Chat with the LLM hosted in Azure.
  * 
  * @param {String} chatId - The ID of the chat
  * @param {String} message - Input text message
+ * @param {String} internalDataContext - System context (internal data)
  * @returns {Promise<String>} Chat response
  */
-export async function chat(chatId, prompt) {
+export async function chat(chatId, prompt, internalDataContext) {
     try {
         //console.log("Chat ID: ", chatId);
         const chatContext = await readTopXFromDB(chatId, 10);
@@ -121,7 +153,9 @@ export async function chat(chatId, prompt) {
         //console.log("The old raw context: ", chatContext);
         //console.log("Reading ", chatContext.length, " records");
 
-        let messages = [];
+        let messages = [
+            { role: 'system', content: internalDataContext}
+        ];
         for (const record of chatContext){
             messages.push({ role: "user", content: record.prompt });
             messages.push({ role: "assistant", content: record.response });
@@ -137,8 +171,8 @@ export async function chat(chatId, prompt) {
             const { action, prompt_detected } = prismaAirsResponse;
 
             if (action === "block"){
-                const blockReason = PrismaAirs.determineBlockReason(prompt_detected);
-                return `Prisma AIRS hat Ihre Anfrage blockiert. Grund: ${blockReason}`;
+                const blockReasons = PrismaAirs.determineBlockReasons(prompt_detected);
+                return `Prisma AIRS hat Ihre Anfrage blockiert. ${blockReasons.length > 1 ? 'Gründe: ' : 'Grund: '} ${blockReasons.join(', ')}`;
             }
         }
 
@@ -156,8 +190,8 @@ export async function chat(chatId, prompt) {
             const { action, response_detected } = responseScan;
 
             if (action === "block"){
-                const blockReason = PrismaAirs.determineBlockReason(response_detected);
-                return `Prisma AIRS hat die Antwort des Assistenten blockiert. Grund: ${blockReason}`;
+                const blockReasons = PrismaAirs.determineBlockReasons(response_detected);
+                return `Prisma AIRS hat die Antwort des Assistenten blockiert. ${blockReasons.length > 1 ? 'Gründe: ' : 'Grund: '} ${blockReasons.join(', ')}`;
             }
         }
 

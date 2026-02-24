@@ -2,7 +2,10 @@ import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
 // 1. Import the chat function from the new module
-import { chat } from './src/ai.js';
+import {
+    addInternalDataContext,
+    chat
+} from './src/ai.js';
 
 import { v4 } from 'uuid';
 
@@ -14,6 +17,7 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const port = 3000;
 
+const internalDataContext = await addInternalDataContext();
 const chatId = v4();
 
 // Middleware to parse incoming JSON payloads (needed for the chat prompt)
@@ -35,7 +39,7 @@ app.post('/api/chat', async (req, res) => {
 
     try {
         // 2. Replace placeholder with call to the external LLM function
-        const responseText = await chat(chatId, prompt);
+        const responseText = await chat(chatId, prompt, internalDataContext);
 
         // The front-end expects a JSON object containing the response text
         res.json({ response: responseText });
