@@ -255,7 +255,7 @@
             });
 
         } catch (error) {
-            assistantContentElement.innerHTML = "An error occurred while communicating with the server.";
+            assistantContentElement.innerHTML = "Es ist ein Fehler aufgetreten.";
             errorMessageDiv.textContent = `Server communication failed: ${error.message}. Please ensure your Node.js server is running (npm start).`;
             errorMessageDiv.classList.remove('hidden');
             console.error("Server Fetch Error:", error);

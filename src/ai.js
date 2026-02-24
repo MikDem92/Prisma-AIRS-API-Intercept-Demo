@@ -134,10 +134,11 @@ export async function chat(chatId, prompt) {
         if (PRISMA_AIRS_PROFILE_ID && PRISMA_AIRS_PROFILE_ID.trim() !== "") {
             const prismaAirsResponse = await prismaAirsClient.scanRequest(chatId, prompt);
             console.log(prismaAirsResponse);
-            const { action, category } = prismaAirsResponse;
+            const { action, prompt_detected } = prismaAirsResponse;
 
             if (action === "block"){
-                return "Prisma AIRS hat Ihre Anfrage blockiert. Grund: "
+                const blockReason = PrismaAirs.determineBlockReason(prompt_detected);
+                return `Prisma AIRS hat Ihre Anfrage blockiert. Grund: ${blockReason}`;
             }
         }
 
@@ -152,10 +153,11 @@ export async function chat(chatId, prompt) {
         if (PRISMA_AIRS_PROFILE_ID && PRISMA_AIRS_PROFILE_ID.trim() !== "") {
             const responseScan = await prismaAirsClient.scanResponse(chatId, prompt, response);
             console.log(responseScan);
-            const { action: respAction, category: respCategory } = responseScan;
+            const { action, response_detected } = responseScan;
 
-            if (respAction === "block"){
-                return "Prisma AIRS hat die Antwort des KI-Assistenten blockiert. Grund: "
+            if (action === "block"){
+                const blockReason = PrismaAirs.determineBlockReason(response_detected);
+                return `Prisma AIRS hat die Antwort des Assistenten blockiert. Grund: ${blockReason}`;
             }
         }
 

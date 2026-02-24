@@ -127,4 +127,35 @@ export class PrismaAirs {
         //console.log(JSON.stringify(result));
         return result;
     }
+
+
+    /**
+     * Returns block reason in natural language
+     * 
+     * @param {Object} detectionObject - Either prompt_detected or response_detected object
+     * @returns {String} Block reason in natural language
+     */
+    static determineBlockReason(detectionObject) {
+        try {
+            if (!detectionObject) throw new Error("The input is not an object");
+
+            for (const category in detectionObject) {
+                if (detectionObject[category] === true) {
+                    switch (category) {
+                        case 'dlp': return 'Verletzung der Datenschutzrichtlinien';
+                        case 'injection': return 'Injection erkannt';
+                        case 'malicious_code': return 'Schadcode erkannt';
+                        case 'topic_violation': return 'Thema nicht erlaubt';
+                        case 'toxic_content': return 'Schadhafter Content erkannt';
+                        case 'url_cats': return 'Verdächtige URL erkannt';
+                        default: continue; // Keep looking if it's an unknown category
+                    }
+                }
+            }
+            return 'Sonstiges'; // Fallback if no specific true categories matched
+        } catch (error) {
+            console.error("Error determining block reason:", error.message);
+            return 'Unbekannt';
+        }
+    }
 }
