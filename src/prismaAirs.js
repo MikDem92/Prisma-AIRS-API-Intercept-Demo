@@ -14,10 +14,10 @@ export class PrismaAirs {
 
     /**
      * Constructs a new PrismaAirsClient instance.
-     * @param {string} endpoint The base URL for the PrismaAirs API.
-     * @param {string} apiKey The authentication key for the API.
-     * @param {string} profileId The specific AI profile identifier to use.
-     * @param {string} modelName The name of the AI model used
+     * @param {string} endpoint - The base URL for the PrismaAirs API.
+     * @param {string} apiKey - The authentication key for the API.
+     * @param {string} profileId - The specific AI profile identifier to use.
+     * @param {string} modelName - The name of the AI model used
      */
     constructor({ endpoint, apiKey, profileId, modelName }) {
         if (!endpoint || !apiKey || !profileId || !modelName) {
@@ -32,11 +32,15 @@ export class PrismaAirs {
 
     /**
      * Sends a scanning request with a user prompt.
-     * @param {string} prompt The text prompt to scan.
+     * 
+     * @param {string} chatId - The chat ID to track the sessions
+     * @param {string} prompt - The text prompt to scan.
+     * @returns {Promise<Object>} The scan response object
      */
-    async scanRequest(prompt) {
+    async scanRequest(chatId, prompt) {
         const payload = {
             tr_id: uuidv4(),
+            session_id: chatId,
             ai_profile: {
                 profile_id: this.#profileId
             },
@@ -82,9 +86,10 @@ export class PrismaAirs {
      * @param {string} prompt The original prompt that generated the response.
      * @param {string} response The model response to scan.
      */
-    async scanResponse(prompt, response) {
+    async scanResponse(chatId, prompt, response) {
         const payload = {
             tr_id: uuidv4(),
+            session_id: chatId,
             ai_profile: {
                 profile_id: this.#profileId
             },

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generic Assistant Chat</title>
+    <title>Mein KI-Assistent</title>
     <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -60,9 +60,9 @@
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-gemini-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
-            Generic Chat Interface (Fixed)
+            Mein KI-Assistent
         </h1>
-        <span class="text-sm text-gray-500">Express AI Backend</span>
+        <span class="text-sm text-gray-500">Demo</span>
     </header>
 
     <!-- Main Chat Area -->
@@ -70,8 +70,8 @@
         <!-- Welcome Message -->
         <div class="flex justify-start">
             <div class="bg-white p-4 rounded-lg shadow-sm max-w-3xl border border-gray-200">
-                <p class="text-sm font-semibold text-gemini-blue mb-1">Assistant</p>
-                <p class="text-gray-700">Hello! This chat is now configured to communicate with your Node.js/Express server on the `/api/chat` endpoint. Try sending a message!</p>
+                <p class="text-sm font-semibold text-gemini-blue mb-1">Assistent</p>
+                <p class="text-gray-700">Hallo! Ich bin Ihr persönlicher KI-Assistent. Sie können mir Fragen stellen und ich werde diese so gut es geht beantworten.</p>
             </div>
         </div>
         <!-- Chat messages will be dynamically added here -->
@@ -82,7 +82,7 @@
         <form id="chat-form" class="flex items-end max-w-4xl mx-auto">
             <textarea id="user-input"
                       rows="1"
-                      placeholder="Type your message here..."
+                      placeholder="Tippen Sie hier Ihre Nachricht ein..."
                       class="flex-1 p-3 resize-none border border-gray-300 rounded-xl focus:ring-2 focus:ring-gemini-blue focus:border-gemini-blue transition-all"
                       oninput="adjustTextareaHeight(this)"
                       required></textarea>
@@ -167,7 +167,7 @@
         if (!isUser) {
             const header = document.createElement('p');
             header.className = 'text-sm font-semibold mb-1';
-            header.textContent = 'Assistant';
+            header.textContent = 'Assistent';
             header.style.color = '#0b66ee'; // Direct gemini blue color
             bubble.appendChild(header);
         }
@@ -233,7 +233,7 @@
         createMessageBubble(currentInput, 'user');
 
         // 2. Prepare Assistant Message container
-        const assistantContentElement = createMessageBubble('Connecting to server...', 'assistant');
+        const assistantContentElement = createMessageBubble('...', 'assistant');
 
         try {
             // CORRECT: Call the Express server function

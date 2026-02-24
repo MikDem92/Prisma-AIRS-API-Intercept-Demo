@@ -132,16 +132,12 @@ export async function chat(chatId, prompt) {
         //console.log("The new context: ", messages);
 
         if (PRISMA_AIRS_PROFILE_ID && PRISMA_AIRS_PROFILE_ID.trim() !== "") {
-            const prismaAirsResponse = await prismaAirsClient.scanRequest(prompt);
+            const prismaAirsResponse = await prismaAirsClient.scanRequest(chatId, prompt);
             console.log(prismaAirsResponse);
             const { action, category } = prismaAirsResponse;
 
             if (action === "block"){
-                if (category === "malicious") {
-                    return "Prisma AIRS discovered a malicious prompt!"
-                } else {
-                    return "Prisma AIRS discovered a prompt which violates the company policy."
-                }
+                return "Prisma AIRS hat Ihre Anfrage blockiert. Grund: "
             }
         }
 
@@ -154,16 +150,12 @@ export async function chat(chatId, prompt) {
         console.log("The chat bot responds with: ", response.slice(0, 10), "...");
 
         if (PRISMA_AIRS_PROFILE_ID && PRISMA_AIRS_PROFILE_ID.trim() !== "") {
-            const responseScan = await prismaAirsClient.scanResponse(prompt, response);
+            const responseScan = await prismaAirsClient.scanResponse(chatId, prompt, response);
             console.log(responseScan);
             const { action: respAction, category: respCategory } = responseScan;
 
             if (respAction === "block"){
-                if (respCategory === "malicious") {
-                    return "Prisma AIRS discovered a malicious response!"
-                } else {
-                    return "Prisma AIRS blocked the response due to company policy violation."
-                }
+                return "Prisma AIRS hat die Antwort des KI-Assistenten blockiert. Grund: "
             }
         }
 
@@ -174,9 +166,9 @@ export async function chat(chatId, prompt) {
     } catch (error) {
         console.error(error.message);
         if (error.code == 400) {
-            return "The response was filtered due to the prompt triggering the model-native security policy";
+            return "Ihre Anfrage wurde von dem KI-Assistenten verworfen.";
         } else {
-            return "I encountered an error while processing your request. Please try again later...";
+            return "Fehler bei der Bearbeitung Ihrer Anfrage. Bitte versuchen Sie es später erneut...";
         }
     }
 }
